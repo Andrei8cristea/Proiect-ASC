@@ -1,0 +1,379 @@
+Assignment – Computer Systems Architecture
+
+Series: 13, 14, 15
+November 2024
+Last update: 17.12.2024
+Table of Contents
+
+    Administrative Details ........................................ 2
+     1.1 Deadline ...................................................... 2
+     1.2 Reminder of the Grading Scheme for the Assignment ........... 2
+     1.3 Submission ................................................... 2
+     1.4 What to Submit ............................................... 2
+     1.5 How the Evaluation Will Be Carried Out ....................... 2
+     1.6 Other Remarks ................................................ 3
+
+    Assignment Description ...................................... 4
+     2.1 Presentation of the Requirements ............................. 4
+
+  2.1.1 Implementation of the System with One-Dimensional Memory ........................................ 4
+  2.1.2 Implementation of the System with Two-Dimensional Memory ....................................... 5
+
+ 2.2 Example of Operation .......................................... 5
+ 2.3 Example for the One-Dimensional Case ......................... 5
+ 2.4 Example for the Two-Dimensional Case ......................... 6
+
+    Requirements ................................................... 9
+     3.1 Requirement 0x00 – One-Dimensional Case ...................... 9
+     3.2 Requirement 0x01 – Two-Dimensional Case ....................... 10
+
+1. Administrative Details
+1.1 Deadline
+
+You may submit your solutions no later than January 5, 2025, at 23:59.
+1.2 Reminder of the Grading Scheme for the Assignment
+
+The assignment is worth 25% of the grade for this lab (according to Course 0x00), and a minimum grade of 5 is required to pass.
+1.3 Submission
+
+You will submit your solutions using the following forms, depending on your group (or series, or specialization):
+
+    Groups 131 and 152: https://forms.gle/sv5YdukZEcDHDS6HA
+    Groups 132 and 151: https://forms.gle/duxvGeAKnkiPqyXF8
+    Groups 133 and 134: https://forms.gle/7h9bwHK9TstX7fYp8
+    Series 14: https://forms.gle/nXNYbVcNqJpAmR3Q6
+    Mathematics-Informatics: https://forms.gle/CPDa5uyyikctJ4Uy7
+    Repeating Students: https://forms.gle/gE9ufvCuLz7zZAC89
+
+1.4 What to Submit
+
+You should upload two source files (one for each requirement) via the form, with the filenames formatted as:
+group - firstname lastname 0.s and group - firstname lastname 1.s.
+
+If you have more than one first or last name, name the files accordingly (for example,
+172 GeorgescuXulescu IonVasile 0.s). It is important that the filenames are correct because testing will be automated.
+1.5 How the Evaluation Will Be Carried Out
+
+There are two steps to obtain your grade:
+
+    Plagiarism Check:
+    All submitted source files will be verified to ensure that there is no plagiarism. If plagiarism is detected, an automatic report will be sent to the Ethics Committee of the University of Bucharest.
+
+    Automated Testing:
+    The sources that pass the anti-plagiarism check will then be automatically tested.
+
+    Important: Students with configurations different from those used in the lab must specify this in the submission form to allow proper evaluation and to avoid receiving a zero by default.
+
+1.6 Other Remarks
+
+    You are allowed to discuss ideas with each other, but be careful—the difference between sharing an idea and sharing your actual code is significant.
+    Do not use automatic converters from C/C++ or other languages to x86 assembly. We have experience with these tools and can easily recognize code that is not originally written by you.
+
+2. Assignment Description
+
+For this assignment, assume that you are part of the development team for a minimal operating system—a software product that manages and coordinates the activities of a computer system, mediating access of application programs to the machine’s resources. Your task is to implement a component for managing a storage device (hard disk or SSD). Since this project is in its early stages, many simplifying assumptions have been made.
+2.1 Presentation of the Requirements
+
+Two modes of operation are considered:
+
+    A one-dimensional (linear) memory case.
+    A two-dimensional memory case.
+
+2.1.1 Implementation of the System with One-Dimensional Memory
+
+In the one-dimensional case, the storage device is expected to operate as follows:
+
+    The storage capacity of the device is fixed at 8 MB.
+    The storage capacity is divided into blocks of 8 kB each.
+    Each block can store content from only one file.
+    A file requires at least two blocks for storage.
+    It is assumed that a file is stored contiguously.
+    If a file cannot be stored contiguously, its writing to the device is not possible.
+
+The operating system does not have a directory–file structure; it only needs to store files. Each file is identified by a descriptor—a unique ID (a natural number between 1 and 255); thus, the system can store a maximum of 255 different files.
+
+The storage management module must be able to perform the following operations:
+
+    Retrieve Storage Interval:
+    Given a file descriptor (ID), return the interval of blocks (start, end) where the file is stored.
+
+    Find Insertion Interval:
+    Given a file descriptor and its size in kB, return the interval of blocks where the file can be stored. The first free interval (from left to right) should be returned. If storage is not possible, return the interval (0, 0).
+
+    Delete File:
+    Given a descriptor, delete the file (i.e., free the blocks where its content was stored). Deletion is defined as the operation where the blocks receive the descriptor value 0.
+
+    Defragmentation:
+    Rearrange/recalculate the blocks where files are stored so that they become compact (i.e., starting from block 0 and using all consecutive blocks without gaps).
+
+2.1.2 Implementation of the System with Two-Dimensional Memory
+
+After completing the one-dimensional implementation, you will notice that the available space fills up quickly. Therefore, you are asked to naturally extend the system to two dimensions—with a size of 8 MB in both directions. In this case, the storage device is two-dimensional; that is, you have a matrix of blocks, and a contiguous section is considered by rows.
+
+    Retrieve Storage Interval:
+    Given a file descriptor, return the block interval in the form ((startX, startY), (endX, endY)) where the file is stored.
+
+    Find Insertion Interval:
+    Given a file descriptor and its size in kB, return the IDs of the blocks where the file can be stored. The first available interval in which the file can be positioned should be returned. If the file cannot be stored, return ((0, 0), (0, 0)).
+
+    Delete File:
+    Given a file descriptor, delete the file (i.e., free the blocks where its content was stored); as in the one-dimensional case, deletion is defined as the operation where the blocks receive the value 0.
+
+    Defragmentation (2D):
+    Rearrange the blocks where files are stored so that they are compactly arranged in the matrix (move the gaps to the bottom-right of the matrix).
+
+2.2 Example of Operation
+
+For this assignment, you will use a simplified representation of memory size to demonstrate that the file system management works. Specifically, you will reduce the 8 kB of a block to 8 B (1 Byte), and you will apply the same conversion for the memory size.
+2.3 Example for the One-Dimensional Case
+
+Initial memory (all blocks are 0):
+
+0, 0, 0, 0, 0, 0, ..., 0, 0, 0
+
+    ADD:
+    If a file with descriptor 5 and size 20 kB is added, then:
+        The descriptor 5 indicates that blocks will be set to 5.
+        The size 20 kB is converted to 20 B in our simplified representation, meaning we need 3 blocks (rounding up).
+        These blocks are allocated consecutively.
+
+    Resulting memory:
+    5, 5, 5, 0, 0, 0, ..., 0, 0, 0
+
+    ADD:
+    Suppose another file with descriptor 143 and size 14 kB is added. It requires 2 blocks, so the memory now becomes:
+
+    5, 5, 5, 143, 143, 0, ..., 0, 0, 0
+
+    GET:
+    Querying the system for the file with descriptor 143 returns the interval (3, 4). If you query for descriptor 10 (which does not exist), it returns (0, 0).
+
+    DELETE:
+    If the file with descriptor 5 is deleted, the memory becomes:
+
+    0, 0, 0, 143, 143, 0, ..., 0, 0, 0
+
+    ADD:
+    Adding another file, now of size 73 kB with descriptor 25, requires 10 blocks (since 73 kB becomes 73 B, rounded up). These blocks are allocated after the last used block (after descriptor 143), resulting in:
+
+    0, 0, 0, 143, 143, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 0, ..., 0, 0, 0
+
+    ADD:
+    Suppose a file with descriptor 251 and size 12 kB is added. This requires 2 blocks (12 kB becomes 12 B). Since there are already three free blocks at the beginning, the file is placed in the first two free blocks:
+
+    251, 251, 0, 143, 143, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 0, ..., 0, 0, 0
+
+    DELETE:
+    Deleting the file with descriptor 25 changes the memory to:
+
+    251, 251, 0, 143, 143, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ..., 0, 0, 0
+
+    DEFRAGMENTATION:
+    Defragment the memory so that files are stored compactly and new files can be placed at lower addresses (not only after the file with descriptor 251). After defragmentation, files with descriptors 143 and 255 will be moved to lower memory addresses, stored consecutively:
+
+    251, 251, 143, 143, 0, 0, 0, ..., 0, 0, 0
+
+    ADD:
+    Now, adding a file with descriptor 4 that occupies 22 kB changes the memory to:
+
+    251, 251, 143, 143, 4, 4, 4, 0, 0, 0, ..., 0, 0, 0
+
+    Observation:
+    If the file with descriptor 4 is deleted and another file with descriptor 29 is added, since the file with descriptor 4 was the last allocated, the file with 29 will be placed immediately after the blocks for descriptor 143.
+
+2.4 Example for the Two-Dimensional Case
+
+Initial memory (all blocks are 0, shown as a matrix):
+
+0, 0, 0, 0, 0, ..., 0, 0, 0
+0, 0, 0, 0, 0, ..., 0, 0, 0
+...
+0, 0, 0, 0, 0, ..., 0, 0, 0
+0, 0, 0, 0, 0, ..., 0, 0, 0
+
+For simplicity, a complete but smaller matrix is used for illustration (do not assume the 8MB × 8MB size in this example; however, you must consider that size in the assignment). In this example, the memory is assumed to be 64 kB by 64 kB.
+
+    ADD:
+    Add a file with descriptor 5 and size 50 kB (occupies 7 blocks):
+
+5, 5, 5, 5, 5, 5, 5, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+
+ADD:
+Add a file with descriptor 2 and size 52 kB (occupies 7 blocks). The memory becomes:
+
+5, 5, 5, 5, 5, 5, 5, 0
+2, 2, 2, 2, 2, 2, 2, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+
+ADD:
+Similarly, add files with descriptors 1, 3, 4, 6, 7, 8 having sizes that occupy 2, 4, 3, 5, 2, and 8 blocks respectively. The resulting memory will be:
+
+5, 5, 5, 5, 5, 5, 5, 0
+2, 2, 2, 2, 2, 2, 2, 0
+1, 1, 3, 3, 3, 3, 7, 7
+4, 4, 4, 6, 6, 6, 6, 6
+8, 8, 8, 8, 8, 8, 8, 8
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+
+Observation: The file with descriptor 7 is placed immediately after the area for the file with descriptor 3 because there were already two free blocks available.
+
+GET:
+Querying for the file with descriptor 3 returns the interval ((2, 2), (2, 5)).
+
+DELETE:
+Deleting files with descriptors 1, 4, and 8 results in:
+
+5, 5, 5, 5, 5, 5, 5, 0
+2, 2, 2, 2, 2, 2, 2, 0
+0, 0, 3, 3, 3, 3, 7, 7
+0, 0, 0, 6, 6, 6, 6, 6
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0
+
+DEFRAGMENTATION:
+Defragment the memory so that it becomes compact, with zeros moving to the bottom-right corner:
+
+    5, 5, 5, 5, 5, 5, 5, 0
+    2, 2, 2, 2, 2, 2, 2, 0
+    3, 3, 3, 3, 7, 7, 0, 0
+    6, 6, 6, 6, 6, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0
+
+    Observation: File storage is done by rows; during defragmentation, the order of the files is preserved as gaps are filled where possible.
+
+3. Requirements
+
+Note: In this assignment, 1 MB = 1024 kB and 1 kB = 1024 B.
+
+You have two requirements:
+
+    One-Dimensional Approach: worth 50 points.
+    Two-Dimensional Approach: worth 40 points.
+
+    Important: Do NOT manually enter input for each test run! The inputs are long and will cost you time. Create a file (e.g., input.txt) containing the desired input. After you have an executable (e.g., task00) that you would normally run with ./task00, run it using ./task00 < input.txt so that the file’s contents are redirected to STDIN—just as if you had typed them manually. Use this approach to test multiple inputs by creating files such as input0.txt, input1.txt, etc., and testing them with ./task00 < input0.txt, ./task00 < input1.txt, etc.
+
+    Important: All strings defined for output in the .data section must end with the newline character \n.
+
+3.1 Requirement 0x00 – One-Dimensional Case
+
+This requirement allows you to earn 50 points, broken down as follows:
+
+    10 points: for implementing the ADD functionality only.
+    10 points: if you implement ADD and GET.
+    10 points: if you implement ADD and DELETE.
+    5 points: if you implement ADD, DELETE, and GET.
+    15 points: if you implement ADD, DELETE, GET, and DEFRAGMENTATION.
+
+(Thus, 10 points for ADD, 20 points for GET or DELETE, 35 points if both ADD, GET, and DELETE are implemented, and 50 points if all are implemented.)
+
+For the first requirement, the input format is as follows:
+
+    First Line: Contains the number O of operations to be performed.
+
+    Subsequent Lines: Each operation is provided with the following codes:
+        1 – ADD
+        2 – GET
+        3 – DELETE
+        4 – DEFRAGMENTATION
+
+    If the operation is ADD:
+        The next line contains a number N, representing the number of files to be added.
+        The following 2N lines contain, in order, the file descriptor and then the file size in kB for each file.
+        The program should output the intervals (represented by block IDs) where the files have been inserted, in the format:
+        "%d: (%d, %d)\n"
+        where the first integer is the descriptor, the second is the starting block, and the third is the ending block. These intervals are considered closed.
+        If a file cannot be added, output:
+        fd: (0, 0)
+        where fd is the descriptor that was to be added.
+
+    If the operation is GET:
+        You will receive a file descriptor on the next line.
+        The program should output the interval where the file is located, or (0, 0) if the file does not exist. The output format must be:
+        "(%d, %d)\n".
+
+    If the operation is DELETE:
+        You will receive a file descriptor on the next line.
+        The program should output the updated memory; if the file exists, its blocks (now set to 0) will be displayed, otherwise the memory remains unchanged.
+
+    If the operation is DEFRAGMENTATION:
+        The program should output the defragmented memory in the same format as the ADD operation, ensuring the continuity of blocks where the files are stored.
+
+(An example input/output explanation is provided in the document.)
+3.2 Requirement 0x01 – Two-Dimensional Case
+
+This requirement allows you to earn 50 points, with the following breakdown:
+
+    10 points: for implementing the ADD method only.
+    An additional 10 points: if ADD, GET, DELETE are implemented.
+    An additional 10 points: if ADD, GET, DELETE, DEFRAGMENTATION are implemented.
+    20 points: if the assignment is fully implemented using actual files on disk.
+
+For this requirement, the input format is as follows:
+
+    First Line: Contains the number O of operations to be performed.
+
+    Subsequent Lines: Each operation is provided with the following codes:
+        1 – ADD
+        2 – GET
+        3 – DELETE
+        4 – DEFRAGMENTATION
+
+    If the operation is ADD:
+        The next line contains a number N, representing the number of files to be added.
+        The following 2N lines contain, in order, the file descriptor and then the file size in kB for each file.
+        The program should output the intervals (represented by block IDs) where the files have been inserted, in the format:
+        "%d: ((%d, %d), (%d, %d))\n"
+        where the first integer is the descriptor, the second is the starting block, and the third is the ending block (the intervals are considered closed).
+        If a file cannot be added, output:
+        fd: ((0, 0), (0, 0))
+        where fd is the descriptor that was to be added.
+
+    If the operation is GET:
+        You will receive a file descriptor on the next line.
+        The program should output the interval where the file is located, or ((0, 0), (0, 0)) if the file does not exist. The output format must be:
+        "((%d, %d), (%d, %d))\n".
+
+    If the operation is DELETE:
+        You will receive a file descriptor on the next line.
+        The program should output the updated memory; if the file exists, its blocks (now set to 0) will be displayed, otherwise the memory remains unchanged.
+
+    If the operation is DEFRAGMENTATION:
+        The program should output the defragmented memory in the same format as after the ADD operation, ensuring the continuity of blocks where the files are stored.
+
+Additionally, operation 5 – CONCRETE is included. In this operation, an absolute file path is provided, and the already implemented ADD operation is used so that the two-dimensional memory is populated based on the files already existing in the specified path. For each file in the given path:
+
+    Determine its file descriptor (by computing (fd % 255) + 1 from the real descriptor returned by the open system call).
+    Determine its size in kB.
+
+Since each file provides a pair (file descriptor, size in kB), the CONCRETE operation is treated exactly like an ADD.
+
+As you process the files, output the information on screen: the calculated descriptor and file size in kB, along with the interval where the file can be inserted into memory.
+If a calculated descriptor is repeated, output it (using the same format as for STDOUT: the descriptor and the size), display fd: ((0, 0), (0, 0)) and do NOT add it to your two-dimensional memory.
+
+For example, in C you might write:
+
+int fds = open(filepath, O_RDONLY);
+int fd = (fds % 255) + 1;
+struct stat fileStat;
+fstat(fds, &fileStat);
+long size = fileStat.st_size / 1024;
+close(fds);
